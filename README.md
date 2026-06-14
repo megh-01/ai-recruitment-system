@@ -1,5 +1,5 @@
 <div align="center">
-  <h1>🤖 AI Recruitment & Candidate Tracking System</h1>
+  <h1> AI Recruitment & Candidate Tracking System</h1>
   <p>
     An enterprise-grade, intelligent recruitment platform built with Spring Boot 3 and Java 21. 
     It leverages AI-driven text extraction to parse candidate resumes, extract skills, and automatically rank candidates against job requirements.
@@ -8,11 +8,11 @@
 
 ---
 
-## 📖 Overview
+##  Overview
 
 The **AI Recruitment System** revolutionizes the hiring process by bridging the gap between recruiters and top talent through automation. By utilizing **Apache PDFBox** for advanced document parsing and a custom **Skill Matching Algorithm**, the system automatically evaluates applications, filtering out candidates who do not meet a configurable selection threshold.
 
-### ✨ Key Capabilities
+###  Key Capabilities
 - **Intelligent Resume Parsing:** Automatically reads and extracts textual data and skills from uploaded PDF resumes.
 - **Automated Candidate Matching:** Compares extracted skills against specific job requirements. Candidates scoring above the `85%` configurable threshold are automatically selected.
 - **Role-Based Access Control (RBAC):** Distinct, secure portals for **Administrators/Recruiters** and **Candidates** using Spring Security.
@@ -21,7 +21,7 @@ The **AI Recruitment System** revolutionizes the hiring process by bridging the 
 
 ---
 
-## 🛠 Technology Stack
+##  Technology Stack
 
 This application is built upon a modern, robust, and scalable Java ecosystem:
 
@@ -43,7 +43,7 @@ This application is built upon a modern, robust, and scalable Java ecosystem:
 
 ---
 
-## 🏗 System Architecture
+##  System Architecture
 
 The application is designed using a standard MVC (Model-View-Controller) architecture, augmented with specialized AI service layers:
 
@@ -62,7 +62,7 @@ com.mca.recruitment
 
 ---
 
-## ⚙️ Core Modules & Logic
+##  Core Modules & Logic
 
 ### 1. The AI Matcher Pipeline
 When a candidate applies for a job, the system initiates the following pipeline:
@@ -78,7 +78,7 @@ When a candidate applies for a job, the system initiates the following pipeline:
 
 ---
 
-## 🚀 Getting Started
+##  Getting Started
 
 Follow these instructions to set up the project on your local development environment.
 
@@ -120,7 +120,7 @@ The application will be accessible at: **http://localhost:8081**
 
 ---
 
-## 🎛 Configuration Properties
+##  Configuration Properties
 
 Key configurations found in `src/main/resources/application.properties`:
 
@@ -133,7 +133,7 @@ Key configurations found in `src/main/resources/application.properties`:
 
 ---
 
-## 🛡 Security & Authentication
+##  Security & Authentication
 - Passwords are securely hashed using **BCryptPasswordEncoder**.
 - Routes are heavily protected:
   - `/admin/**` endpoints are restricted to users with the `ADMIN` / `RECRUITER` role.
@@ -142,7 +142,7 @@ Key configurations found in `src/main/resources/application.properties`:
 
 ---
 
-## 🤝 Contribution Guidelines
+##  Contribution Guidelines
 1. Fork the repository.
 2. Create a feature branch: `git checkout -b feature/your-feature-name`
 3. Commit your changes: `git commit -m 'Add some feature'`
