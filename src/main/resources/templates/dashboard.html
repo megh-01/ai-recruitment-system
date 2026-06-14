@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Recruitment Dashboard</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="logo">AI RecruitTrack</div>
+	<div class="nav-links">
+	    <a href="/">Home</a>
+	    <a href="/register-page">Register</a>
+	    <a href="/candidate-page">Candidate</a>
+	    <a href="/job-page">Post Job</a>
+	    <a href="/jobs-list">Vacancies</a>
+	    <a href="/apply-page">Apply</a>
+	    <a href="/dashboard">Dashboard</a>
+	</div>
+</nav>
+
+<div class="dashboard-container">
+    <h1>Recruitment Dashboard</h1>
+    <p class="subtitle">Overview of candidates, jobs and applications.</p>
+
+    <div class="stats">
+        <div class="stat-card">
+            <h2 id="candidateCount">0</h2>
+            <p>Candidates</p>
+        </div>
+
+        <div class="stat-card">
+            <h2 id="jobCount">0</h2>
+            <p>Jobs</p>
+        </div>
+
+        <div class="stat-card">
+            <h2 id="applicationCount">0</h2>
+            <p>Applications</p>
+        </div>
+    </div>
+
+    <div class="table-section">
+        <h2>Applications</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Application ID</th>
+                    <th>Candidate</th>
+                    <th>Job</th>
+                    <th>Status</th>
+                    <th>AI Match %</th>
+                </tr>
+            </thead>
+            <tbody id="applicationTable">
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function loadDashboard() {
+        fetch("/api/candidates")
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("candidateCount").innerText = data.length;
+            });
+
+        fetch("/api/jobs")
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("jobCount").innerText = data.length;
+            });
+
+        fetch("/api/applications")
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("applicationCount").innerText = data.length;
+
+                let rows = "";
+
+                data.forEach(app => {
+                    let candidateName = app.candidate ? app.candidate.fullName : "N/A";
+                    let jobTitle = app.job ? app.job.title : "N/A";
+
+                    rows += `
+                        <tr>
+                            <td>${app.id}</td>
+                            <td>${candidateName}</td>
+                            <td>${jobTitle}</td>
+                            <td><span class="status">${app.status}</span></td>
+                            <td>${app.matchPercentage.toFixed(2)}%</td>
+                        </tr>
+                    `;
+                });
+
+                document.getElementById("applicationTable").innerHTML = rows;
+            });
+    }
+
+    loadDashboard();
+</script>
+
+</body>
+</html>

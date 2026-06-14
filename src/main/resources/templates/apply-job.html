@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Apply Job</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="logo">AI RecruitTrack</div>
+    <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/register-page">Register</a>
+        <a href="/candidate-page">Candidate</a>
+        <a href="/job-page">Post Job</a>
+        <a href="/jobs-list">Vacancies</a>
+        <a href="/apply-page">Apply</a>
+        <a href="/dashboard">Dashboard</a>
+    </div>
+</nav>
+
+<div class="form-container">
+    <div class="form-card">
+        <h2>Apply for Job</h2>
+        <p>Enter candidate ID and job ID to calculate AI match percentage.</p>
+
+        <form id="applyForm">
+            <label>Candidate ID</label>
+            <input type="number" id="candidateId" placeholder="Enter candidate ID" required>
+
+            <label>Job ID</label>
+            <input type="number" id="jobId" placeholder="Enter job ID" required>
+
+            <button type="submit" class="btn primary full">Apply and Match</button>
+        </form>
+
+        <div id="result" class="result-box"></div>
+    </div>
+</div>
+
+<script>
+    // Auto-fill job ID if coming from Vacancies page like /apply-page?jobId=1
+    const urlParams = new URLSearchParams(window.location.search);
+    const jobIdFromUrl = urlParams.get("jobId");
+
+    if (jobIdFromUrl) {
+        document.getElementById("jobId").value = jobIdFromUrl;
+    }
+
+    document.getElementById("applyForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+
+        const data = {
+            candidateId: Number(document.getElementById("candidateId").value),
+            jobId: Number(document.getElementById("jobId").value)
+        };
+
+        fetch("/api/applications/apply", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        })
+        .then(async response => {
+            const responseData = await response.json();
+
+            if (!response.ok) {
+                throw new Error(responseData.message || "Something went wrong while applying for job");
+            }
+
+            return responseData;
+        })
+        .then(data => {
+            const match = data.matchPercentage !== undefined && data.matchPercentage !== null
+                ? data.matchPercentage.toFixed(2)
+                : "0.00";
+
+            document.getElementById("result").innerHTML =
+                "<strong>Application Submitted Successfully!</strong><br>" +
+                "Application ID: " + data.id + "<br>" +
+                "Status: " + data.status + "<br>" +
+                "AI Match Percentage: " + match + "%";
+        })
+        .catch(error => {
+            document.getElementById("result").innerHTML =
+                "<strong>Application Failed</strong><br>" + error.message;
+        });
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Candidate Profile</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="logo">AI RecruitTrack</div>
+	<div class="nav-links">
+	    <a href="/">Home</a>
+	    <a href="/register-page">Register</a>
+	    <a href="/candidate-page">Candidate</a>
+	    <a href="/job-page">Post Job</a>
+	    <a href="/jobs-list">Vacancies</a>
+	    <a href="/apply-page">Apply</a>
+	    <a href="/dashboard">Dashboard</a>
+	</div>
+</nav>
+
+<div class="form-container">
+    <div class="form-card">
+
+        <h2>Candidate Profile</h2>
+        <p>Create candidate profile using registered user ID.</p>
+
+        <form id="candidateForm">
+            <label>Full Name</label>
+            <input type="text" id="fullName" placeholder="Enter candidate full name" required>
+
+            <label>Phone</label>
+            <input type="text" id="phone" placeholder="Enter phone number" required>
+
+            <label>Education</label>
+            <input type="text" id="education" placeholder="Example: MCA" required>
+
+            <label>Skills</label>
+            <input type="text" id="skills" placeholder="Example: Java, Spring Boot, PostgreSQL" required>
+
+            <label>Experience</label>
+            <input type="text" id="experience" placeholder="Example: Fresher / 1 Year" required>
+
+            <label>User ID</label>
+            <input type="number" id="userId" placeholder="Enter registered user ID" required>
+
+            <button type="submit" class="btn primary full">Create Candidate</button>
+        </form>
+
+        <div id="candidateResult" class="result-box"></div>
+
+        <hr class="section-divider">
+
+        <h2>Upload Resume</h2>
+        <p>Upload candidate resume in PDF format. The system will extract skills from the resume.</p>
+
+        <form id="resumeForm" enctype="multipart/form-data">
+            <label>Candidate ID</label>
+            <input type="number" id="resumeCandidateId" placeholder="Enter candidate ID" required>
+
+            <label>Upload Resume</label>
+            <input type="file" id="resumeFile" accept=".pdf,.txt" required>
+
+            <button type="submit" class="btn primary full">Upload Resume</button>
+        </form>
+
+        <div id="resumeResult" class="result-box"></div>
+
+    </div>
+</div>
+
+<script>
+    document.getElementById("candidateForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+
+        const data = {
+            fullName: document.getElementById("fullName").value,
+            phone: document.getElementById("phone").value,
+            education: document.getElementById("education").value,
+            skills: document.getElementById("skills").value,
+            experience: document.getElementById("experience").value,
+            userId: Number(document.getElementById("userId").value)
+        };
+
+        fetch("/api/candidates", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById("candidateResult").innerHTML =
+                "<strong>Candidate Created Successfully!</strong><br>" +
+                "Candidate ID: " + data.id + "<br>" +
+                "Name: " + data.fullName + "<br>" +
+                "Skills: " + data.skills;
+
+            document.getElementById("resumeCandidateId").value = data.id;
+        })
+        .catch(error => {
+            document.getElementById("candidateResult").innerHTML =
+                "Error creating candidate: " + error;
+        });
+    });
+
+
+    document.getElementById("resumeForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+
+        const candidateId = document.getElementById("resumeCandidateId").value;
+        const fileInput = document.getElementById("resumeFile");
+        const file = fileInput.files[0];
+
+        if (!file) {
+            document.getElementById("resumeResult").innerHTML = "Please select a resume file.";
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        fetch("/api/resumes/upload/" + candidateId, {
+            method: "POST",
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById("resumeResult").innerHTML =
+                "<strong>Resume Uploaded Successfully!</strong><br>" +
+                "Resume ID: " + data.id + "<br>" +
+                "File Name: " + data.fileName + "<br>" +
+                "Uploaded At: " + data.uploadedAt;
+        })
+        .catch(error => {
+            document.getElementById("resumeResult").innerHTML =
+                "Error uploading resume: " + error;
+        });
+    });
+</script>
+
+</body>
+</html>

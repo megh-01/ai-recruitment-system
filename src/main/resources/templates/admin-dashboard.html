@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="logo">Admin Portal</div>
+
+    <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="#" id="logoutLink">Logout</a>
+    </div>
+</nav>
+
+<div class="dashboard-container">
+
+    <h1>Recruitment Dashboard</h1>
+
+    <p class="subtitle">
+        Overview of candidates, jobs, applications and selection results.
+    </p>
+
+    <div class="stats">
+
+        <div class="stat-card">
+            <h2 id="candidateCount">0</h2>
+            <p>Candidates</p>
+        </div>
+
+        <div class="stat-card">
+            <h2 id="jobCount">0</h2>
+            <p>Jobs</p>
+        </div>
+
+        <div class="stat-card">
+            <h2 id="applicationCount">0</h2>
+            <p>Applications</p>
+        </div>
+
+        <div class="stat-card selected-count-card">
+            <h2 id="selectedCount">0</h2>
+            <p>Selected</p>
+        </div>
+
+        <div class="stat-card rejected-count-card">
+            <h2 id="rejectedCount">0</h2>
+            <p>Not Selected</p>
+        </div>
+
+    </div>
+
+    <div class="table-section">
+
+        <h2>Candidate Application Results</h2>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>Application ID</th>
+                    <th>Candidate</th>
+                    <th>Email</th>
+                    <th>Job</th>
+                    <th>Company</th>
+                    <th>AI Match</th>
+                    <th>Decision</th>
+                </tr>
+                </thead>
+
+                <tbody id="applicationTable"></tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    if (localStorage.getItem("adminLoggedIn") !== "true") {
+        window.location.href = "/admin-login";
+    }
+
+    document.getElementById("logoutLink")
+        .addEventListener("click", function(event) {
+
+            event.preventDefault();
+
+            localStorage.removeItem("adminLoggedIn");
+
+            window.location.href = "/admin-login";
+        });
+
+    async function loadDashboard() {
+        try {
+            const candidateResponse =
+                await fetch("/api/candidates");
+
+            const jobResponse =
+                await fetch("/api/jobs");
+
+            const applicationResponse =
+                await fetch("/api/applications");
+
+            if (!candidateResponse.ok
+                    || !jobResponse.ok
+                    || !applicationResponse.ok) {
+
+                throw new Error(
+                    "Unable to load dashboard information"
+                );
+            }
+
+            const candidates =
+                await candidateResponse.json();
+
+            const jobs =
+                await jobResponse.json();
+
+            const applications =
+                await applicationResponse.json();
+
+            document.getElementById("candidateCount")
+                .innerText = candidates.length;
+
+            document.getElementById("jobCount")
+                .innerText = jobs.length;
+
+            document.getElementById("applicationCount")
+                .innerText = applications.length;
+
+            const selectedApplications =
+                applications.filter(application =>
+                    application.status === "SELECTED"
+                );
+
+            const rejectedApplications =
+                applications.filter(application =>
+                    application.status === "REJECTED"
+                );
+
+            document.getElementById("selectedCount")
+                .innerText = selectedApplications.length;
+
+            document.getElementById("rejectedCount")
+                .innerText = rejectedApplications.length;
+
+            let rows = "";
+
+            applications.forEach(application => {
+
+                const candidateName =
+                    application.candidate
+                        ? application.candidate.fullName
+                        : "N/A";
+
+                const candidateEmail =
+                    application.candidate
+                    && application.candidate.user
+                        ? application.candidate.user.email
+                        : "N/A";
+
+                const jobTitle =
+                    application.job
+                        ? application.job.title
+                        : "N/A";
+
+                const companyName =
+                    application.job
+                        ? application.job.companyName
+                        : "N/A";
+
+                const match =
+                    application.matchPercentage !== undefined
+                    && application.matchPercentage !== null
+                        ? Number(
+                            application.matchPercentage
+                          ).toFixed(2)
+                        : "0.00";
+
+                let decisionBadge = "";
+
+                if (application.status === "SELECTED") {
+
+                    decisionBadge =
+                        "<span class='decision-badge selected'>" +
+                        "Selected" +
+                        "</span>";
+
+                } else if (application.status === "REJECTED") {
+
+                    decisionBadge =
+                        "<span class='decision-badge rejected'>" +
+                        "Not Selected" +
+                        "</span>";
+
+                } else {
+
+                    decisionBadge =
+                        "<span class='decision-badge pending'>" +
+                        application.status +
+                        "</span>";
+                }
+
+                rows += `
+                    <tr>
+                        <td>${application.id}</td>
+                        <td>${candidateName}</td>
+                        <td>${candidateEmail}</td>
+                        <td>${jobTitle}</td>
+                        <td>${companyName}</td>
+                        <td>
+                            <strong>${match}%</strong>
+                        </td>
+                        <td>${decisionBadge}</td>
+                    </tr>
+                `;
+            });
+
+            if (applications.length === 0) {
+                rows = `
+                    <tr>
+                        <td colspan="7"
+                            class="empty-table-message">
+                            No applications are available.
+                        </td>
+                    </tr>
+                `;
+            }
+
+            document.getElementById("applicationTable")
+                .innerHTML = rows;
+
+        } catch (error) {
+
+            document.getElementById("applicationTable")
+                .innerHTML = `
+                    <tr>
+                        <td colspan="7"
+                            class="empty-table-message">
+                            ${error.message}
+                        </td>
+                    </tr>
+                `;
+        }
+    }
+
+    loadDashboard();
+</script>
+
+</body>
+</html>

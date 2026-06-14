@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Job Vacancies</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="logo">AI RecruitTrack</div>
+	<div class="nav-links">
+	    <a href="/">Home</a>
+	    <a href="/register-page">Register</a>
+	    <a href="/candidate-page">Candidate</a>
+	    <a href="/job-page">Post Job</a>
+	    <a href="/jobs-list">Vacancies</a>
+	    <a href="/apply-page">Apply</a>
+	    <a href="/dashboard">Dashboard</a>
+	</div>
+</nav>
+
+<div class="dashboard-container">
+    <h1>Available Job Vacancies</h1>
+    <p class="subtitle">Browse all job openings posted by recruiters.</p>
+
+    <div id="jobsContainer" class="jobs-grid"></div>
+</div>
+
+<script>
+    function loadJobs() {
+        fetch("/api/jobs")
+            .then(response => response.json())
+            .then(data => {
+                let container = document.getElementById("jobsContainer");
+
+                if (data.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-box">
+                            <h2>No Job Vacancies Available</h2>
+                            <p>Please post a job first from the Post Job page.</p>
+                            <a href="/job-page" class="btn primary">Post a Job</a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let cards = "";
+
+                data.forEach(job => {
+                    cards += `
+                        <div class="job-card">
+                            <div class="job-header">
+                                <h2>${job.title}</h2>
+                                <span>Job ID: ${job.id}</span>
+                            </div>
+
+                            <p class="company">${job.companyName}</p>
+                            <p class="location">📍 ${job.location}</p>
+
+                            <div class="job-info">
+                                <strong>Required Skills:</strong>
+                                <p>${job.requiredSkills}</p>
+                            </div>
+
+                            <div class="job-info">
+                                <strong>Experience:</strong>
+                                <p>${job.experienceRequired}</p>
+                            </div>
+
+                            <div class="job-info">
+                                <strong>Description:</strong>
+                                <p>${job.description}</p>
+                            </div>
+
+							<a href="/apply-page?jobId=${job.id}" class="btn primary full">Apply for this Job</a>
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = cards;
+            })
+            .catch(error => {
+                document.getElementById("jobsContainer").innerHTML =
+                    "<p>Error loading jobs: " + error + "</p>";
+            });
+    }
+
+    loadJobs();
+</script>
+
+</body>
+</html>

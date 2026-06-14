@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Job</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="logo">AI RecruitTrack</div>
+	<div class="nav-links">
+	    <a href="/">Home</a>
+	    <a href="/register-page">Register</a>
+	    <a href="/candidate-page">Candidate</a>
+	    <a href="/job-page">Post Job</a>
+	    <a href="/jobs-list">Vacancies</a>
+	    <a href="/apply-page">Apply</a>
+	    <a href="/dashboard">Dashboard</a>
+	</div>
+</nav>
+
+<div class="form-container">
+    <div class="form-card">
+        <h2>Post a Job</h2>
+        <p>Create a job opening with required skills.</p>
+
+        <form id="jobForm">
+            <label>Job Title</label>
+            <input type="text" id="title" placeholder="Example: Java Developer" required>
+
+            <label>Company Name</label>
+            <input type="text" id="companyName" placeholder="Example: ABC Technologies" required>
+
+            <label>Location</label>
+            <input type="text" id="location" placeholder="Example: Bangalore" required>
+
+            <label>Required Skills</label>
+            <input type="text" id="requiredSkills" placeholder="Example: Java, Spring Boot, PostgreSQL, REST API" required>
+
+            <label>Experience Required</label>
+            <input type="text" id="experienceRequired" placeholder="Example: 0-1 Years" required>
+
+            <label>Description</label>
+            <textarea id="description" placeholder="Enter job description" required></textarea>
+
+            <button type="submit" class="btn primary full">Create Job</button>
+        </form>
+
+        <div id="result" class="result-box"></div>
+    </div>
+</div>
+
+<script>
+    document.getElementById("jobForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+
+        const data = {
+            title: document.getElementById("title").value,
+            companyName: document.getElementById("companyName").value,
+            location: document.getElementById("location").value,
+            requiredSkills: document.getElementById("requiredSkills").value,
+            experienceRequired: document.getElementById("experienceRequired").value,
+            description: document.getElementById("description").value
+        };
+
+        fetch("/api/jobs", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById("result").innerHTML =
+                "<strong>Job Created Successfully!</strong><br>Job ID: " + data.id +
+                "<br>Title: " + data.title +
+                "<br>Required Skills: " + data.requiredSkills;
+        })
+        .catch(error => {
+            document.getElementById("result").innerHTML = "Error: " + error;
+        });
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Recruiter Home</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="logo">Recruiter Portal</div>
+    <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/recruiter-register">Register</a>
+    </div>
+</nav>
+
+<div class="dashboard-container">
+    <h1>Recruiter Dashboard</h1>
+    <p class="subtitle">Post jobs and view AI-based candidate match results.</p>
+
+    <div class="form-card wide-card">
+        <h2>Post Job Vacancy</h2>
+
+        <form id="jobForm">
+            <label>Job Title</label>
+            <input type="text" id="title" required>
+
+            <label>Company Name</label>
+            <input type="text" id="companyName" required>
+
+            <label>Location</label>
+            <input type="text" id="location" required>
+
+            <label>Required Skills</label>
+            <input type="text" id="requiredSkills" placeholder="Java, Spring Boot, PostgreSQL" required>
+
+            <label>Experience Required</label>
+            <input type="text" id="experienceRequired" required>
+
+            <label>Description</label>
+            <textarea id="description" required></textarea>
+
+            <button type="submit" class="btn primary full">Post Job</button>
+        </form>
+
+        <div id="jobResult" class="result-box"></div>
+    </div>
+
+    <div class="table-section">
+        <h2>Applications and Match Percentage</h2>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Application ID</th>
+                <th>Candidate</th>
+                <th>Job</th>
+                <th>Status</th>
+                <th>AI Match %</th>
+            </tr>
+            </thead>
+            <tbody id="applicationTable"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    document.getElementById("jobForm").addEventListener("submit", async function(event) {
+        event.preventDefault();
+
+        const data = {
+            title: document.getElementById("title").value,
+            companyName: document.getElementById("companyName").value,
+            location: document.getElementById("location").value,
+            requiredSkills: document.getElementById("requiredSkills").value,
+            experienceRequired: document.getElementById("experienceRequired").value,
+            description: document.getElementById("description").value
+        };
+
+        const response = await fetch("/api/jobs", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            document.getElementById("jobResult").innerHTML =
+                "<strong>Error</strong><br>Job posting failed";
+            return;
+        }
+
+        document.getElementById("jobResult").innerHTML =
+            "<strong>Job Posted Successfully!</strong><br>" +
+            "Job ID: " + result.id + "<br>" +
+            "Title: " + result.title;
+
+        document.getElementById("jobForm").reset();
+        loadApplications();
+    });
+
+    function loadApplications() {
+        fetch("/api/applications")
+            .then(response => response.json())
+            .then(data => {
+                let rows = "";
+
+                data.forEach(app => {
+                    rows += `
+                        <tr>
+                            <td>${app.id}</td>
+                            <td>${app.candidate ? app.candidate.fullName : "N/A"}</td>
+                            <td>${app.job ? app.job.title : "N/A"}</td>
+                            <td><span class="status">${app.status}</span></td>
+                            <td>${app.matchPercentage.toFixed(2)}%</td>
+                        </tr>
+                    `;
+                });
+
+                document.getElementById("applicationTable").innerHTML = rows;
+            });
+    }
+
+    loadApplications();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Login</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="logo">Admin Portal</div>
+    <div class="nav-links">
+        <a href="/">Home</a>
+    </div>
+</nav>
+
+<div class="form-container">
+    <div class="form-card">
+        <h2>Admin Login</h2>
+        <p>Login using your admin credentials.</p>
+
+        <form id="adminLoginForm">
+            <label>Admin ID</label>
+            <input type="text" id="adminId" placeholder="Enter admin ID" required>
+
+            <label>Password</label>
+            <input type="password" id="password" placeholder="Enter admin password" required>
+
+            <button type="submit" class="btn primary full">Login as Admin</button>
+        </form>
+
+        <div id="result" class="result-box"></div>
+    </div>
+</div>
+
+<script>
+    document.getElementById("adminLoginForm").addEventListener("submit", async function(event) {
+        event.preventDefault();
+
+        try {
+            const loginData = {
+                adminId: document.getElementById("adminId").value,
+                password: document.getElementById("password").value
+            };
+
+            const response = await fetch("/api/auth/admin-login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(loginData)
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.message || "Admin login failed");
+            }
+
+            localStorage.setItem("adminLoggedIn", "true");
+
+            document.getElementById("result").innerHTML =
+                "<strong>Admin Login Successful!</strong><br>Redirecting to dashboard...";
+
+            setTimeout(() => {
+                window.location.href = "/admin-dashboard";
+            }, 1000);
+
+        } catch (error) {
+            document.getElementById("result").innerHTML =
+                "<strong>Error</strong><br>" + error.message;
+        }
+    });
+</script>
+
+</body>
+</html>

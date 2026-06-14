@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Candidate Login</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="logo">Candidate Portal</div>
+    <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/candidate-register">Register</a>
+    </div>
+</nav>
+
+<div class="form-container">
+    <div class="form-card">
+        <h2>Candidate Login</h2>
+        <p>Login using your registered email and password.</p>
+
+        <form id="candidateLoginForm">
+            <label>Email</label>
+            <input type="email" id="email" placeholder="Enter your email" required>
+
+            <label>Password</label>
+            <input type="password" id="password" placeholder="Enter password" required>
+
+            <button type="submit" class="btn primary full">Login as Candidate</button>
+        </form>
+
+        <div id="result" class="result-box"></div>
+    </div>
+</div>
+
+<script>
+    document.getElementById("candidateLoginForm").addEventListener("submit", async function(event) {
+        event.preventDefault();
+
+        try {
+            const loginData = {
+                email: document.getElementById("email").value,
+                password: document.getElementById("password").value
+            };
+
+            const loginResponse = await fetch("/api/auth/candidate-login", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(loginData)
+            });
+
+            const user = await loginResponse.json();
+
+            if (!loginResponse.ok) {
+                throw new Error(user.message || "Login failed");
+            }
+
+            const candidateResponse = await fetch("/api/candidates/user/" + user.userId);
+            const candidate = await candidateResponse.json();
+
+            if (!candidateResponse.ok) {
+                throw new Error(candidate.message || "Candidate profile not found");
+            }
+
+            localStorage.setItem("candidateUserId", user.userId);
+            localStorage.setItem("candidateId", candidate.id);
+            localStorage.setItem("candidateName", candidate.fullName);
+
+            document.getElementById("result").innerHTML =
+                "<strong>Login Successful!</strong><br>" +
+                "Candidate ID: " + candidate.id + "<br>" +
+                "Redirecting to vacancies...";
+
+            setTimeout(() => {
+                window.location.href = "/candidate-home";
+            }, 1000);
+
+        } catch (error) {
+            document.getElementById("result").innerHTML =
+                "<strong>Error</strong><br>" + error.message;
+        }
+    });
+</script>
+
+</body>
+</html>
